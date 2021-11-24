@@ -1,0 +1,12 @@
+version: "2.2"
+
+services:
+  mysql:
+    image: "hive-metastore-docker:latest"
+    restart: always
+    network_mode: host
+    environment:
+    - HIVE_METASTORE_JDBC_URL
+    - HIVE_METASTORE_JDBC_DRIVER_NAME
+    - HIVE_METASTORE_USERNAME
+    - HIVE_METASTORE_PASSWORD
