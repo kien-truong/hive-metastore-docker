@@ -14,6 +14,7 @@ RUN apt-get update && \
     apt-get clean && \
     apt-get autoremove
 
+# Entrypoint
 ENTRYPOINT ["/app/tini", "--"]
 CMD ["/app/docker-entrypoint.sh"]
 
