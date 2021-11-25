@@ -32,11 +32,18 @@ ENV HIVE_VERSION=${HIVE_VERSION}
 ENV HIVE_HOME=/app/apache-hive-${HIVE_VERSION}-bin
 ENV HIVE_CONF=${HIVE_HOME}/conf
 RUN curl https://dlcdn.apache.org/hive/hive-${HIVE_VERSION}/apache-hive-${HIVE_VERSION}-bin.tar.gz \
-    | tar -xzC /app && \
-    chown hive ${HIVE_CONF}
+    | tar -xzC /app
+
+# Fix guava compatibility issue with old Hive version
+RUN rm -rf ${HIVE_HOME}/lib/guava-19.0.jar && \
+    cp ${HADOOP_HOME}/share/hadoop/common/lib/guava-27.0-jre.jar ${HIVE_HOME}/lib/
+
+# Download GCS Connector to enable access to google cloud storage
+RUN cd ${HADOOP_HOME}/share/hadoop/common/lib && \
+    curl -O -L https://repo1.maven.org/maven2/com/google/cloud/bigdataoss/gcs-connector/hadoop3-2.2.4/gcs-connector-hadoop3-2.2.4-shaded.jar
 
 # Download MySQL JDBC library for metastore connection
-RUN cd /app/apache-hive-${HIVE_VERSION}-bin/lib && \
+RUN cd ${HIVE_HOME}/lib && \
     curl -O https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.27/mysql-connector-java-8.0.27.jar
 
 # Download Tini for PID 1
@@ -45,16 +52,15 @@ RUN cd /app/ && \
     curl -O -L https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini && \
     chmod +x /app/tini
 
-# Fix guava compatibility issue with old Hive version
-RUN rm -rf /app/apache-hive-${HIVE_VERSION}-bin/lib/guava-19.0.jar && \
-    cp /app/hadoop-${HADOOP_VERSION}/share/hadoop/common/lib/guava-27.0-jre.jar /app/apache-hive-${HIVE_VERSION}-bin/lib/
-
 COPY files/hive-log4j2.properties ${HIVE_CONF}/
 
 COPY templates /app/templates
 
 COPY files/docker-entrypoint.sh /app/
-RUN chmod +x /app/docker-entrypoint.sh
+
+# Fixup file permission
+RUN chown hive ${HIVE_CONF} ${HADOOP_CONF}/core-site.xml && \
+    chmod +x /app/docker-entrypoint.sh
 
 # Set default user to run
 USER hive
