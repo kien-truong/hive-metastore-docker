@@ -1,7 +1,7 @@
 version: "2.2"
 
 services:
-  mysql:
+  hive-metastore-mysql:
     image: "hive-metastore-docker:latest"
     restart: always
     network_mode: host
