@@ -1,5 +1,5 @@
 # Use a Java 8 base image
-FROM eclipse-temurin:8-focal
+FROM eclipse-temurin:8-jammy
 
 # Set working directory
 WORKDIR /app
@@ -19,7 +19,7 @@ ENTRYPOINT ["/app/tini", "--"]
 CMD ["/app/docker-entrypoint.sh"]
 
 # Download Hadoop
-ARG HADOOP_VERSION=3.2.2
+ARG HADOOP_VERSION=3.3.4
 ENV HADOOP_VERSION=${HADOOP_VERSION}
 ENV HADOOP_HOME=/app/hadoop-${HADOOP_VERSION}
 ENV HADOOP_CONF=${HADOOP_HOME}/etc/hadoop
@@ -27,7 +27,7 @@ RUN curl https://dlcdn.apache.org/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-
     | tar -xzC /app
 
 # Download Hive
-ARG HIVE_VERSION=3.1.2
+ARG HIVE_VERSION=3.1.3
 ENV HIVE_VERSION=${HIVE_VERSION}
 ENV HIVE_HOME=/app/apache-hive-${HIVE_VERSION}-bin
 ENV HIVE_CONF=${HIVE_HOME}/conf
@@ -39,12 +39,14 @@ RUN rm -rf ${HIVE_HOME}/lib/guava-19.0.jar && \
     cp ${HADOOP_HOME}/share/hadoop/common/lib/guava-27.0-jre.jar ${HIVE_HOME}/lib/
 
 # Download GCS Connector to enable access to google cloud storage
+ARG GCS_VERSION=hadoop3-2.2.8
 RUN cd ${HADOOP_HOME}/share/hadoop/common/lib && \
-    curl -O -L https://repo1.maven.org/maven2/com/google/cloud/bigdataoss/gcs-connector/hadoop3-2.2.4/gcs-connector-hadoop3-2.2.4-shaded.jar
+    curl -O -L https://repo1.maven.org/maven2/com/google/cloud/bigdataoss/gcs-connector/${GCS_VERSION}/gcs-connector-${GCS_VERSION}-shaded.jar
 
 # Download MySQL JDBC library for metastore connection
+ARG MYSQL_CONNECTOR_VERSION=8.0.30
 RUN cd ${HIVE_HOME}/lib && \
-    curl -O https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.27/mysql-connector-java-8.0.27.jar
+    curl -O https://repo1.maven.org/maven2/mysql/mysql-connector-java/${MYSQL_CONNECTOR_VERSION}/mysql-connector-java-${MYSQL_CONNECTOR_VERSION}.jar
 
 # Download Tini for PID 1
 ARG TINI_VERSION=v0.19.0
