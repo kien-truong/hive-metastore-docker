@@ -18,6 +18,12 @@
 -->
 
 <configuration>
+
+  <property>
+    <name>fs.defaultFS</name>
+    <value>${HADOOP_DEFAULT_FS}</value>
+  </property>
+
   <property>
     <name>fs.AbstractFileSystem.gs.impl</name>
     <value>com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS</value>
